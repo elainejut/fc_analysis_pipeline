@@ -52,6 +52,29 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
 
     elseif strcmp(fc_method, 'granger')
         disp('running functional connectivity analysis with granger causality...');
+        % mvar analysis
+        cfg = [];
+        cfg.order = 8; % Define model order
+        % cfg.keeptrial = 'yes';
+        cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
+        mdata = ft_mvaranalysis(cfg, data);
+
+        % freq analysis on mvar data
+        cfg        = [];
+        cfg.method = 'mvar';
+        cfg.foi = FREQ_DICT(freq_band);
+        mfreq      = ft_freqanalysis(cfg, mdata);
+
+        % find granger causality
+        cfg           = [];
+        cfg.method    = 'granger';
+        % cfg.granger.sfmethod = 'bivariate';  % Use bivariate Granger causality
+        connectivity       = ft_connectivityanalysis(cfg, mfreq);
+
+        % find the average connectivity matrix (averaged across each
+        % frequency bin (dimension 3))
+        conn_mat = mean(connectivity.grangerspctrm, 3);
+
     end
    
     % % extend from conn_mat 
@@ -63,17 +86,23 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
 
     conn_mat_all_chan = insertMissingElectrodes(all_electrodes, connectivity.label, conn_mat);
 
-    disp(size(conn_mat_all_chan));
+    % disp(size(conn_mat_all_chan));
+    % disp('conn_mat_all_chan:');
+    % figure;imagesc(conn_mat_all_chan);
+    % xlabel('To Node');
+    % ylabel('From Node');
+    % % xticks(data_load.data_interp_avgref.label);
+    % cbh = colorbar();
 
-    conn_mat_alphabetical = conn_mat_all_chan(electrode_organizations.alphabetical.idx, electrode_organizations.alphabetical.idx);
-    conn_mat_by_region = conn_mat_all_chan(electrode_organizations.by_region.idx, electrode_organizations.by_region.idx);
+    % conn_mat_alphabetical = conn_mat_all_chan(electrode_organizations.alphabetical.idx, electrode_organizations.alphabetical.idx);
+    % conn_mat_by_region = conn_mat_all_chan(electrode_organizations.by_region.idx, electrode_organizations.by_region.idx);
 
     connectivity_analysis_result = struct();
     connectivity_analysis_result.connectivity = connectivity;
     connectivity_analysis_result.conn_mat_orig = conn_mat;
     connectivity_analysis_result.conn_mat_all_chan = conn_mat_all_chan;
-    connectivity_analysis_result.conn_mat_alphabetical = conn_mat_alphabetical;
-    connectivity_analysis_result.conn_mat_by_region = conn_mat_by_region;
+    % connectivity_analysis_result.conn_mat_alphabetical = conn_mat_alphabetical;
+    % connectivity_analysis_result.conn_mat_by_region = conn_mat_by_region;
 
 
 end
