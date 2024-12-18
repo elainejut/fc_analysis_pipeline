@@ -15,6 +15,13 @@ function data_out = loadData(filename, CAR_bool)
     data_load = load(filename);
     data_before_car = data_load.data_clean;
 
+    % ignore 'resp' channel if it exists
+    if ismember("Resp", data_before_car.label)
+        num_clean_channels = length(data_before_car.label) - 1; % ignore the "Resp" channel
+        data_before_car.label = data_before_car.label(1:num_clean_channels); 
+        data_before_car.trial = cellfun(@(m)m(1:num_clean_channels, :), data_before_car.trial, 'UniformOutput',false);
+    end
+    
     if CAR_bool == true
         disp('running CAR...');
         % implement CAR 

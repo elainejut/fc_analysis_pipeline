@@ -13,6 +13,12 @@ function conn_mat_all_channels = insertMissingElectrodes(all_electrodes, good_el
     num_electrodes = length(all_electrodes);
     intersect = ismember(all_electrodes, good_electrodes);
     intersect_idx = find(intersect == 1);
+    % disp("[insert... ] debugging");
+    % disp(num_electrodes);
+    % disp(intersect);
+    % disp(length(intersect));
+    % disp(intersect_idx);
+    % disp(length(intersect_idx))
 
     intermediate = NaN(num_electrodes, size(conn_mat, 2));
     intermediate(intersect_idx, :) = conn_mat;

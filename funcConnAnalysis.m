@@ -38,6 +38,12 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.keeptrials = 'yes';
         freq            = ft_freqanalysis(cfg, data);
 
+        disp("CHECKING FREQ BANDS: ");
+        disp(data);
+        disp(freq);
+        disp(freq.freq(1));
+        disp(freq.freq(end));
+
         % implement imaginary part of coherence functional connectivity 
         % analysis with FieldTrip
         cfg         = [];
@@ -83,6 +89,12 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     % conn_mat(labels_mask, :) = NaN;
     % % Apply the mask to columns
     % conn_mat(:, labels_mask) = NaN;
+    
+    % disp("[funcConnAnalysis] debugging");
+    % disp(connectivity);
+    % disp(length(conn_mat));
+    % disp(size(connectivity.cohspctrm));
+    % disp(connectivity.label);
 
     conn_mat_all_chan = insertMissingElectrodes(all_electrodes, connectivity.label, conn_mat);
 
