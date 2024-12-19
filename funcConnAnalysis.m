@@ -38,11 +38,11 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.keeptrials = 'yes';
         freq            = ft_freqanalysis(cfg, data);
 
-        disp("CHECKING FREQ BANDS: ");
-        disp(data);
-        disp(freq);
-        disp(freq.freq(1));
-        disp(freq.freq(end));
+        % disp("CHECKING FREQ BANDS: ");
+        % disp(data);
+        % disp(freq);
+        % disp(freq.freq(1));
+        % disp(freq.freq(end));
 
         % implement imaginary part of coherence functional connectivity 
         % analysis with FieldTrip
@@ -106,15 +106,15 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     % % xticks(data_load.data_interp_avgref.label);
     % cbh = colorbar();
 
-    conn_mat_by_letter = conn_mat_all_chan(electrode_organizations.by_letter.idx, electrode_organizations.by_letter.idx);
-    conn_mat_by_region = conn_mat_all_chan(electrode_organizations.by_region.idx, electrode_organizations.by_region.idx);
+    % conn_mat_by_letter = conn_mat_all_chan(electrode_organizations.by_letter.idx, electrode_organizations.by_letter.idx);
+    % conn_mat_by_region = conn_mat_all_chan(electrode_organizations.by_region.idx, electrode_organizations.by_region.idx);
 
     connectivity_analysis_result = struct();
     connectivity_analysis_result.connectivity = connectivity;
     connectivity_analysis_result.conn_mat_orig = conn_mat;
     connectivity_analysis_result.conn_mat_all_chan = conn_mat_all_chan;
-    connectivity_analysis_result.conn_mat_by_letter = conn_mat_by_letter;
-    connectivity_analysis_result.conn_mat_by_region = conn_mat_by_region;
+    % connectivity_analysis_result.conn_mat_by_letter = conn_mat_by_letter;
+    % connectivity_analysis_result.conn_mat_by_region = conn_mat_by_region;
 
 
 end
