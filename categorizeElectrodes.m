@@ -15,32 +15,33 @@ function electrode_organizations = categorizeElectrodes(all_electrodes)
 
     % Define electrode regions
     remaining_electrodes = all_electrodes;
-    Fp_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'Fp', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    Fp_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'Fp', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, Fp_electrodes);
-    AF_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'AF', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    AF_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'AF', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, AF_electrodes);
-    FC_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'FC', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    FC_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'FC', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, FC_electrodes);
-    FT_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'FT', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    FT_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'FT', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, FT_electrodes);
-    CP_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'CP', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    CP_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'CP', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, CP_electrodes);
-    TP_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'TP', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    TP_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'TP', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, TP_electrodes);
-    PO_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'PO', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false)));
+    PO_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'PO', IgnoreCase=false), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, PO_electrodes);
-    F_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'F', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false)));
+    F_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'F', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, F_electrodes);
-    C_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'C', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false)));
+    C_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'C', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, C_electrodes);
-    T_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'T', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false)));
+    T_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'T', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, T_electrodes);
-    P_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'P', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false)));
+    P_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'P', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, P_electrodes);
-    O_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'O', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false)));
+    O_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'O', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false))));
     remaining_electrodes = setdiff(remaining_electrodes, O_electrodes);
-    I_electrodes = remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'I', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false)));
-    remaining_electrodes = setdiff(remaining_electrodes, I_electrodes);
+    I_electrodes = sort(remaining_electrodes(cell2mat(arrayfun(@(str)startsWith(str, 'I', IgnoreCase=true), remaining_electrodes, 'UniformOutput', false))));
+    remaining_electrodes = setdiff(remaining_electrodes, I_electrodes); % should be empty 
+
 
     frontal_electrodes = {'Fp1', 'Fp2', 'Fz', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', ...
                           'AF3', 'AF4', 'AF7', 'AF8', 'AFz'};
@@ -117,15 +118,17 @@ function electrode_organizations = categorizeElectrodes(all_electrodes)
     region_idx_fields = struct2cell(region_idx); % Convert struct fields to a cell array
     region_concat_idx = cat(2, region_idx_fields{:}); % Concatenate the contents horizontally
     
-    % ALPHABETICAL: (useful for connectivity matrix visualization)
+    % BY LETTER: (useful for connectivity matrix visualization)
 
-    [alphabetical_labels, alphabetical_idx] = sort(all_electrodes);
+    by_letter_labels = cat(1, Fp_electrodes, AF_electrodes, F_electrodes, FC_electrodes, FT_electrodes, C_electrodes, CP_electrodes, T_electrodes, TP_electrodes, P_electrodes, PO_electrodes, O_electrodes, I_electrodes);
+    [~, by_letter_idx] = ismember(by_letter_labels, all_electrodes);  
+    % [by_letter_labels, by_letter_idx] = sort(all_electrodes);
 
     % define output structure 
     electrode_organizations = struct();
-    electrode_organizations.alphabetical = struct();
-    electrode_organizations.alphabetical.idx = alphabetical_idx.';
-    electrode_organizations.alphabetical.label = alphabetical_labels.';
+    electrode_organizations.by_letter = struct();
+    electrode_organizations.by_letter.idx = by_letter_idx.';
+    electrode_organizations.by_letter.label = by_letter_labels.';
     electrode_organizations.by_region = struct();
     electrode_organizations.by_region.struct = struct();
     electrode_organizations.by_region.struct.idx = region_idx.';

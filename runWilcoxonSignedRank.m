@@ -58,7 +58,11 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     for i = 1:n_channels
         for j = 1:n_channels
             count = count + 1;
-            w_stat_vals(i, j) = w_stats(count);
+            if i == j
+                w_stat_vals(i, j) = 0;
+            else
+                w_stat_vals(i, j) = w_stats(count);
+            end
             if ismember(count, significant_indices)
                 significant_pairs = [significant_pairs; i, j]; % Append (i, j) pair
             end
