@@ -1,9 +1,9 @@
-function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
+function wilcoxon_results = runWilcoxonSignedRankSummed(pre, post, alpha, tail_dir)
     % [description]
     %
     % Input:
-    %   pre  - (64, 64, n) connectivity matrix for "pre" condition
-    %   post - (64, 64, n) connectivity matrix for "post" condition
+    %   pre  - (64, n) summed (either across rows or columns) connectivity matrix for "pre" condition 
+    %   post - (64, n) summed (either across rows or columns) connectivity matrix for "post" condition
     %   alpha - significance level (default 0.05)
     %   tail_dir - direction of tail for signrank test ('tail', 'right' is
     %   checking whether pre-post > 0; ==> if yes, then there was a decrease)
@@ -11,7 +11,7 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     % Output:
     % 
 
-    [n_channels, ~, n_participants] = size(pre);
+    [n_channels, n_participants] = size(pre);
 
     % Initialize storage
     p_values = []; % Store p-values for all (i, j) pairs
@@ -26,27 +26,27 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     % check_vals.stats = [];
     % Iterate through upper triangle of matrix (including diagonal)
     for i = 1:n_channels
-        for j = 1:n_channels
-            % Extract paired data across participants
-            pre_values = squeeze(pre(i, j, :));  % Vector of size (n_participants, 1)
-            post_values = squeeze(post(i, j, :)); % Vector of size (n_participants, 1)
-            % Perform Wilcoxon signed-rank test
-            try 
-                [p,h,stats] = signrank(pre_values, post_values, 'tail', tail_dir); % Two-tailed test --> 'tail', 'right' is checking whether pre-post > 0; ==> if yes, then there was a decrease
-                % disp(stats);
-                % check_vals.p = [check_vals.p, p];
-                % check_vals.h = [check_vals.h, h];
-                % check_vals.stats = [check_vals.stats, stats];
-                p_values = [p_values; p]; % Append p-value to the list
-                w_stats = [w_stats; stats.signedrank];
-            catch ME
-                if ME.message == "No data remaining after removal of NaNs."
-                    p = NaN;
-                    p_values = [p_values; p];
-                    w_stats = [w_stats; p];
-                end
-            end 
-        end
+        % for j = 1:n_channels
+        % Extract paired data across participants
+        pre_values = pre(i, :).';  % Vector of size (n_participants, 1)
+        post_values = post(i, :).'; % Vector of size (n_participants, 1)
+        % Perform Wilcoxon signed-rank test
+        try 
+            [p,h,stats] = signrank(pre_values, post_values, 'tail', tail_dir); % Two-tailed test --> 'tail', 'right' is checking whether pre-post > 0; ==> if yes, then there was a decrease
+            % disp(stats);
+            % check_vals.p = [check_vals.p, p];
+            % check_vals.h = [check_vals.h, h];
+            % check_vals.stats = [check_vals.stats, stats];
+            p_values = [p_values; p]; % Append p-value to the list
+            w_stats = [w_stats; stats.signedrank];
+        catch ME
+            if ME.message == "No data remaining after removal of NaNs."
+                p = NaN;
+                p_values = [p_values; p];
+                w_stats = [w_stats; p];
+            end
+        end 
+        % end
     end
 
     % Apply FDR correction
@@ -63,34 +63,34 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     
     % Map indices back to (i, j) electrode pairs
     significant_pairs = [];
-    w_stat_vals = zeros(n_channels, n_channels);
+    w_stat_vals = []; % zeros(n_channels);
     count = 0;
     for i = 1:n_channels
-        for j = 1:n_channels
-            count = count + 1;
-            % if i == j
-            %     w_stat_vals(i, j) = 0;
-            % else
-            w_stat_vals(i, j) = w_stats(count);
-            % end
-            if ismember(count, significant_indices)
-                significant_pairs = [significant_pairs; i, j]; % Append (i, j) pair
-            end
+        % for j = 1:n_channels
+        count = count + 1;
+        % if i == j
+        %     w_stat_vals(i, j) = 0;
+        % else
+        w_stat_vals = [w_stat_vals, w_stats(count)];
+        % end
+        if ismember(count, significant_indices)
+            significant_pairs = [significant_pairs; i]; % Append (i) electrode
         end
+        % end
     end
 
-    % normalize W statistic to be between [-1 1] --> interpret this as
-    % "effect size" (Barnett et al., 2020)
-    total_rank_sum = n_participants * (n_participants + 1) / 2;
+    % SKIP THIS FOR NOW
+    % % normalize W statistic to be between [-1 1] --> interpret this as
+    % % "effect size" (Barnett et al., 2020)
+    % r_total = n_participants * (n_participants + 1) / 2;
     % norm_factor = r_total / 2;
     % w_normalized_temp = (w_stat_vals - norm_factor) / norm_factor;
-    w_normalized_temp = 2 * (w_stat_vals / total_rank_sum) - 1;
-    w_normalized = w_normalized_temp - diag(diag(w_normalized_temp)); % make sure diagonal is 0
+    % w_normalized = w_normalized_temp - diag(diag(w_normalized_temp)); % make sure diagonal is 0
 
     % set up structure to return
     wilcoxon_results = struct();
     wilcoxon_results.w_stat_vals = w_stat_vals;
-    wilcoxon_results.w_normalized = w_normalized;
+    wilcoxon_results.w_normalized = w_stat_vals; % w_normalized; FIX THIS LATER
     wilcoxon_results.significant_pairs = significant_pairs; 
     wilcoxon_results.orig_h = h; 
     wilcoxon_results.orig_p_values = p_values;

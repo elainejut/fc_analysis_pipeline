@@ -12,7 +12,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     %   connectivity_analysis_result (struct) - structure containing
     %   resulting connectivity matrices
     %       1. connectivity - initial connectivity output from FieldTrip 
-    %       toolbox 
+    %       toolbox i
     %       2. conn_mat_orig - averaged conn_mat as output by FieldTrip
     %       (will not include the channels that are missing) 
     %       3. conn_mat_all_chan
@@ -22,7 +22,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     % 
 
     % create dictionary of frequency bands and their thresholds
-    FREQ_DICT = containers.Map({'theta', 'alpha', 'low_beta', 'high_beta', 'gamma'}, {[4 8], [8 13], [13 20], [20 30], [30 45]});
+    FREQ_DICT = containers.Map({'delta', 'theta', 'alpha', 'low_beta', 'high_beta', 'gamma', 'broadband'}, {[1 4], [4 8], [8 13], [13 20], [20 30], [30 45], [1 45]});
     disp(FREQ_DICT(freq_band));
 
     if strcmp(fc_method, 'icoh')
@@ -32,7 +32,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.method    = 'mtmfft';
         cfg.taper     = 'dpss';
         cfg.output    = 'fourier';
-        cfg.foilim    = FREQ_DICT(freq_band);
+        cfg.foi    = FREQ_DICT(freq_band); % cfg.foi or cfg.foilim
         cfg.tapsmofrq = 2;
         cfg.channel   = 'all';
         cfg.keeptrials = 'yes';
@@ -54,6 +54,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         % find the average connectivity matrix (averaged across each
         % frequency bin (dimension 3))
         conn_mat = mean(connectivity.cohspctrm, 3);
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0 % ERROR: TAKING THIS OUT BECAUSE DIAGONAL SHOULD BE 1 AND I SHOULDN'T NEED TO SET THIS
 
 
     elseif strcmp(fc_method, 'granger')
@@ -80,6 +81,82 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         % find the average connectivity matrix (averaged across each
         % frequency bin (dimension 3))
         conn_mat = mean(connectivity.grangerspctrm, 3);
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
+    
+    elseif strcmp(fc_method, 'dtf')
+        disp('running functional connectivity analysis with directed transfer function...');
+        % mvar analysis
+        cfg = [];
+        cfg.order = 8; % Define model order
+        % cfg.keeptrial = 'yes';
+        cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
+        mdata = ft_mvaranalysis(cfg, data);
+
+        % freq analysis on mvar data
+        cfg        = [];
+        cfg.method = 'mvar';
+        cfg.foi = FREQ_DICT(freq_band);
+        mfreq      = ft_freqanalysis(cfg, mdata);
+
+        % find granger causality
+        cfg           = [];
+        cfg.method    = 'dtf';
+        % cfg.granger.sfmethod = 'bivariate';  % Use bivariate Granger causality
+        connectivity       = ft_connectivityanalysis(cfg, mfreq);
+
+        % find the average connectivity matrix (averaged across each
+        % frequency bin (dimension 3))
+        conn_mat = mean(connectivity.dtfspctrm, 3);
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
+    
+    elseif strcmp(fc_method, 'pdc')
+        disp('running functional connectivity analysis with partial directed coherence...');
+        % mvar analysis
+        cfg = [];
+        cfg.order = 8; % Define model order
+        % cfg.keeptrial = 'yes';
+        cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
+        mdata = ft_mvaranalysis(cfg, data);
+
+        % freq analysis on mvar data
+        cfg        = [];
+        cfg.method = 'mvar';
+        cfg.foi = FREQ_DICT(freq_band);
+        mfreq      = ft_freqanalysis(cfg, mdata);
+
+        % find granger causality
+        cfg           = [];
+        cfg.method    = 'pdc';
+        % cfg.granger.sfmethod = 'bivariate';  % Use bivariate Granger causality
+        connectivity       = ft_connectivityanalysis(cfg, mfreq);
+
+        % find the average connectivity matrix (averaged across each
+        % frequency bin (dimension 3))
+        conn_mat = mean(connectivity.pdcspctrm, 3);
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
+
+
+    elseif strcmp(fc_method, 'mi')
+        disp('running functional connectivity analysis with mutual information...');
+        % analysis with FieldTrip
+        cfg         = [];
+        cfg.method  = 'mi';
+        connectivity   = ft_connectivityanalysis(cfg, data);
+        
+        % find the connectivity matrix 
+        conn_mat = connectivity.mi;
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
+
+    elseif strcmp(fc_method, 'corr')
+        disp('running functional connectivity analysis with Pearson correlation...');
+        % analysis with FieldTrip
+        cfg         = [];
+        cfg.method  ='corr';
+        connectivity   = ft_connectivityanalysis(cfg, data);
+        
+        % find the connectivity matrix 
+        conn_mat = connectivity.corr;
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
 
     end
    
@@ -96,7 +173,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     % disp(size(connectivity.cohspctrm));
     % disp(connectivity.label);
 
-    conn_mat_all_chan = insertMissingElectrodes(all_electrodes, connectivity.label, conn_mat);
+    conn_mat_all_chan = insertMissingElectrodes(all_electrodes, connectivity.label, conn_mat_diag);
 
     % disp(size(conn_mat_all_chan));
     % disp('conn_mat_all_chan:');

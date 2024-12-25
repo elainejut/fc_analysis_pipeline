@@ -1,4 +1,4 @@
-function createFigureICOH(fc_wilcoxon_effect, ELECTRODE_ORGANIZATIONS, layout, freq_band, save_dir)
+function createFigureUndirected(fc_wilcoxon_effect, ELECTRODE_ORGANIZATIONS, layout, freq_band, save_dir)
     % [description]
     %
     % Input:
@@ -83,27 +83,27 @@ function createFigureICOH(fc_wilcoxon_effect, ELECTRODE_ORGANIZATIONS, layout, f
     circularGraph(norm_decrease_thresh, 'Colormap', cmap, 'Label', reorderedLabels);
     saveas(f, sprintf("%s/conn_circle_decrease.png", save_dir)); 
         
-    % TOPOGRAPHIC BRAIN
-    connectivity_mean = mean(fc_wilcoxon_effect, 2); % Mean of rows (averaging across all pairs for each electrode)    
-    topo_data = [];
-    topo_data.label = layout.label(1:64,:);           % Electrode labels
-    topo_data.avg = connectivity_mean';       % Connectivity values (1x64)
-    topo_data.time = 1;                       % Dummy time point
-    topo_data.dimord = 'chan_time';           % Specify data dimension
-    f = figure('Visible','off');
-    cfg = [];
-    cfg.layout = layout;                 % Use loaded layout
-    cfg.parameter = 'avg';               % Specify data parameter
-    cfg.zlim = [-1 1];
-    cfg.colorbar = 'yes';
-    cfg.comment = sprintf("freq=%s", freq_band);
-    cfg.figure = gca;
-    ft_topoplotTFR(cfg, topo_data);
-    N = 256; % number of colorsdd
-    cmap = brewermap(N, '-RdBu');
-    cbh = colormap(cmap);
-    colorbar;
-    saveas(f, sprintf("%s/topoplot.png", save_dir)); 
+    % % TOPOGRAPHIC BRAIN
+    % connectivity_mean = mean(fc_wilcoxon_effect, 2); % Mean of rows (averaging across all pairs for each electrode)    
+    % topo_data = [];
+    % topo_data.label = layout.label(1:64,:);           % Electrode labels
+    % topo_data.avg = connectivity_mean';       % Connectivity values (1x64)
+    % topo_data.time = 1;                       % Dummy time point
+    % topo_data.dimord = 'chan_time';           % Specify data dimension
+    % f = figure('Visible','off');
+    % cfg = [];
+    % cfg.layout = layout;                 % Use loaded layout
+    % cfg.parameter = 'avg';               % Specify data parameter
+    % cfg.zlim = [-1 1];
+    % cfg.colorbar = 'yes';
+    % cfg.comment = sprintf("freq=%s", freq_band);
+    % cfg.figure = gca;
+    % ft_topoplotTFR(cfg, topo_data);
+    % N = 256; % number of colorsdd
+    % cmap = brewermap(N, '-RdBu');
+    % cbh = colormap(cmap);
+    % colorbar;
+    % saveas(f, sprintf("%s/topoplot.png", save_dir)); 
 
 
     % NETWORK CONNECTIVITY ON TOPOGRAPHIC BRAIN ??
