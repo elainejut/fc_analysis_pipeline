@@ -57,12 +57,15 @@ function wilcoxon_results = runWilcoxonSignedRankSummed(pre, post, alpha, tail_d
     % [h, crit_p] = fdr_bh(p_values.', .05, 'pdep', 'yes'); % mafdr(p_values, 'BHFDR', true);
     % fdr_corrected_pvals = crit_p;
     rejected = fdr_corrected_pvals < alpha; % Logical array for significant tests
-    
+    orig_rejected = p_values < 0.01; % alpha; % stricter threshold instead of alpha
+
     % Identify significant pairs
     significant_indices = find(rejected); % Indices of significant pairs
-    
+    orig_significant_indices = find(orig_rejected);
+
     % Map indices back to (i, j) electrode pairs
     significant_pairs = [];
+    orig_significant_pairs = [];
     w_stat_vals = []; % zeros(n_channels);
     count = 0;
     for i = 1:n_channels
@@ -76,25 +79,28 @@ function wilcoxon_results = runWilcoxonSignedRankSummed(pre, post, alpha, tail_d
         if ismember(count, significant_indices)
             significant_pairs = [significant_pairs; i]; % Append (i) electrode
         end
+        if ismember(count, orig_significant_indices)
+            orig_significant_pairs = [orig_significant_pairs; i]; % Append (i) electrode
+        end
         % end
     end
 
-    % SKIP THIS FOR NOW
-    % % normalize W statistic to be between [-1 1] --> interpret this as
-    % % "effect size" (Barnett et al., 2020)
-    % r_total = n_participants * (n_participants + 1) / 2;
+    % normalize W statistic to be between [-1 1] --> interpret this as
+    % "effect size" (Barnett et al., 2020)
+    total_rank_sum = n_participants * (n_participants + 1) / 2;
     % norm_factor = r_total / 2;
     % w_normalized_temp = (w_stat_vals - norm_factor) / norm_factor;
-    % w_normalized = w_normalized_temp - diag(diag(w_normalized_temp)); % make sure diagonal is 0
+    w_normalized = 2 * (w_stat_vals / total_rank_sum) - 1;
 
     % set up structure to return
     wilcoxon_results = struct();
     wilcoxon_results.w_stat_vals = w_stat_vals;
-    wilcoxon_results.w_normalized = w_stat_vals; % w_normalized; FIX THIS LATER
-    wilcoxon_results.significant_pairs = significant_pairs; 
+    wilcoxon_results.w_normalized = w_normalized; 
     wilcoxon_results.orig_h = h; 
     wilcoxon_results.orig_p_values = p_values;
+    wilcoxon_results.orig_significant_pairs = orig_significant_pairs;
     wilcoxon_results.corrected_p_values = fdr_corrected_pvals; 
+    wilcoxon_results.significant_pairs = significant_pairs; 
 
     % % Display result
     % disp('Normalized Wilcoxon W-statistics: (effect size - from Barnett et al., 2020)');

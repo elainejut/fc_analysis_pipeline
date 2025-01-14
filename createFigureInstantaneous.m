@@ -15,8 +15,8 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
 
     % CONNECTIVITY MATRIX
     % Original electrode order
-    pre_matrix = fc_pre_group_all_chan(:, :, p_idx);
-    post_matrix = fc_post_group_all_chan(:, :, p_idx);
+    pre_matrix = fc_pre_group_all_chan(:, :, 19); % mean(fc_pre_group_all_chan, 3); % 
+    post_matrix = fc_post_group_all_chan(:, :, 19); % mean(fc_post_group_all_chan, 3); % 
 
     pre_max = max(pre_matrix, [], 'all');
     post_max = max(post_matrix, [], 'all');
@@ -28,50 +28,106 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     f = figure('Visible','off');
     imagesc(reorderedMatrix, [0 max_conn]); % [0 1] for standardization between all 
     % title('Normalized W-statistic as effect size');
-    xlabel('To Node');
-    ylabel('From Node');
-    axis square; % Makes the axes equal in size for a square plot
+    % xlabel('To Node');
+    % ylabel('From Node');
+    % axis square; % Makes the axes equal in size for a square plot
     % Add labels to rows and columns
     % set(gca,'fontsize', ) 
-    xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
-    yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
-    xticklabels(reorderedLabels); % Set x-axis labels
-    yticklabels(reorderedLabels); % Set y-axis labels
-    xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
-    ax = gca;
-    ax.XAxis.FontSize = 6;
-    ax.YAxis.FontSize = 6;
-    ax.FontWeight = 'bold';
+    % xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
+    % yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
+    % xticklabels(reorderedLabels); % Set x-axis labels
+    % yticklabels(reorderedLabels); % Set y-axis labels
+    % xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
+    % ax = gca;
+    % ax.XAxis.FontSize = 6;
+    % ax.YAxis.FontSize = 6;
+    % ax.FontWeight = 'bold';
     N = 256; % number of colorsdd
     cmap = brewermap(N, '-RdBu');
     cbh = colormap(cmap);
-    colorbar;
-    saveas(f, sprintf("%s/fc_pre_group_all_chan_%03d.png", save_dir, p_idx));
+    % colorbar;
+    hold on;
+    % line([0,65.5], [2.5,2.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [7.5, 7.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [16.5, 16.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [23.5, 23.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [27.5, 27.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [35.5, 35.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [41.5, 41.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [43.5, 43.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [47.5, 47.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [43.5, 43.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [56.5, 56.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [61.5, 61.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [64.5, 64.5], 'Color', 'black', 'LineWidth', 3);
+    % line([7.5, 7.5], [0,65.5],'Color', 'black', 'LineWidth', 3);
+    % line([2.5, 2.5], [0,65.5],'Color', 'black', 'LineWidth', 3);
+    % line([16.5, 16.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([23.5, 23.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([27.5, 27.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([35.5, 35.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([41.5, 41.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([43.5, 43.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([47.5, 47.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([43.5, 43.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([56.5, 56.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([61.5, 61.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([64.5, 64.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    axis square;
+    saveas(f, sprintf("%s/fc_pre_group_all_chan_021.png", save_dir));
 
     reorderedMatrix = post_matrix(ELECTRODE_ORGANIZATIONS.by_letter.idx, ELECTRODE_ORGANIZATIONS.by_letter.idx);
     reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
     f = figure('Visible','off');
     imagesc(reorderedMatrix, [0 max_conn]); % [0 1] for standardization between all 
     % title('Normalized W-statistic as effect size');
-    xlabel('To Node');
-    ylabel('From Node');
-    axis square; % Makes the axes equal in size for a square plot
+    % xlabel('To Node');
+    % ylabel('From Node');
+    % axis square; % Makes the axes equal in size for a square plot
     % Add labels to rows and columns
     % set(gca,'fontsize', ) 
-    xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
-    yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
-    xticklabels(reorderedLabels); % Set x-axis labels
-    yticklabels(reorderedLabels); % Set y-axis labels
-    xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
-    ax = gca;
-    ax.XAxis.FontSize = 6;
-    ax.YAxis.FontSize = 6;
-    ax.FontWeight = 'bold';
+    % xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
+    % yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
+    % xticklabels(reorderedLabels); % Set x-axis labels
+    % yticklabels(reorderedLabels); % Set y-axis labels
+    % xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
+    % ax = gca;
+    % ax.XAxis.FontSize = 6;
+    % ax.YAxis.FontSize = 6;
+    % ax.FontWeight = 'bold';
     N = 256; % number of colorsdd
     cmap = brewermap(N, '-RdBu');
     cbh = colormap(cmap);
-    colorbar;
-    saveas(f, sprintf("%s/fc_post_group_all_chan_%03d.png", save_dir, p_idx));
+    % colorbar;
+    hold on;
+    % line([0,65.5], [2.5,2.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [7.5, 7.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [16.5, 16.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [23.5, 23.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [27.5, 27.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [35.5, 35.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [41.5, 41.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [43.5, 43.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [47.5, 47.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [43.5, 43.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [56.5, 56.5], 'Color', 'black', 'LineWidth', 3);
+    line([0,65.5], [61.5, 61.5], 'Color', 'black', 'LineWidth', 3);
+    % line([0,65.5], [64.5, 64.5], 'Color', 'black', 'LineWidth', 3);
+    % line([7.5, 7.5], [0,65.5],'Color', 'black', 'LineWidth', 3);
+    % line([2.5, 2.5], [0,65.5],'Color', 'black', 'LineWidth', 3);
+    % line([16.5, 16.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([23.5, 23.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([27.5, 27.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([35.5, 35.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([41.5, 41.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([43.5, 43.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([47.5, 47.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([43.5, 43.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([56.5, 56.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    line([61.5, 61.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    % line([64.5, 64.5], [0,65.5], 'Color', 'black', 'LineWidth', 3);
+    axis square;
+    saveas(f, sprintf("%s/fc_post_group_all_chan_021.png", save_dir));
 
     % % CONNECTIVITY CIRCLE
     % % Reorganize electrode order for circle graph
@@ -107,8 +163,8 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     % % TOPOGRAPHIC BRAIN
     % if mode == "undirected"
     %     assert(all(abs(sum(pre_matrix, 2, "omitnan")-sum(pre_matrix, 1, "omitnan").') < 0.00001)); % checking that matrix is symmetric so sum across rows and columns should be equal
-    %     per_node_pre = sum(pre_matrix, 2, "omitnan"); % Mean of rows (averaging across all pairs for each electrode)    
-    %     per_node_post = sum(post_matrix, 2, "omitnan"); % Mean of rows (averaging across all pairs for each electrode)
+    %     per_node_pre = sum(pre_matrix, 2, "omitnan"); % sum of rows (summing across all pairs for each electrode)    
+    %     per_node_post = sum(post_matrix, 2, "omitnan"); % sum of rows (summing across all pairs for each electrode)
     %     pre_max = max(per_node_pre);
     %     post_max = max(per_node_post);
     %     max_conn = max([pre_max, post_max]);
@@ -132,7 +188,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     %     cmap = brewermap(N, '-RdBu');
     %     cbh = colormap(cmap);
     %     colorbar;
-    %     saveas(f, sprintf("%s/fc_pre_topoplot_%03d.png", save_dir, p_idx)); 
+    %     saveas(f, sprintf("%s/fc_pre_topoplot_avg.png", save_dir)); 
     % 
     %     % post_matrix
     %     topo_data = [];
@@ -153,8 +209,8 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     %     cmap = brewermap(N, '-RdBu');
     %     cbh = colormap(cmap);
     %     colorbar;
-    %     saveas(f, sprintf("%s/fc_post_topoplot_%03d.png", save_dir, p_idx)); 
-
+    %     saveas(f, sprintf("%s/fc_post_topoplot_avg.png", save_dir)); 
+    % 
     % elseif mode == "directed"
     %     per_node_pre_out = sum(pre_matrix, 2, "omitnan"); % Mean of rows (averaging across all pairs for each electrode)    
     %     per_node_pre_in = sum(pre_matrix, 1, "omitnan"); % Mean of rows (averaging across all pairs for each electrode)    
@@ -186,7 +242,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     %     cmap = brewermap(N, '-RdBu');
     %     cbh = colormap(cmap);
     %     colorbar;
-    %     saveas(f, sprintf("%s/fc_pre_topoplot_outbound_%03d.png", save_dir, p_idx)); 
+    %     saveas(f, sprintf("%s/fc_pre_topoplot_outbound_avg.png", save_dir)); 
     %     % inbound
     %     topo_data = [];
     %     topo_data.label = layout.label(1:64,:);           % Electrode labels
@@ -206,7 +262,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     %     cmap = brewermap(N, '-RdBu');
     %     cbh = colormap(cmap);
     %     colorbar;
-    %     saveas(f, sprintf("%s/fc_pre_topoplot_inbound_%03d.png", save_dir, p_idx)); 
+    %     saveas(f, sprintf("%s/fc_pre_topoplot_inbound_avg.png", save_dir)); 
     % 
     %     % post_matrix
     %     % outbound
@@ -228,7 +284,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     %     cmap = brewermap(N, '-RdBu');
     %     cbh = colormap(cmap);
     %     colorbar;
-    %     saveas(f, sprintf("%s/fc_post_topoplot_outbound_%03d.png", save_dir, p_idx)); 
+    %     saveas(f, sprintf("%s/fc_post_topoplot_outbound_avg.png", save_dir)); 
     %     % inbound
     %     topo_data = [];
     %     topo_data.label = layout.label(1:64,:);           % Electrode labels
@@ -248,14 +304,11 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     %     cmap = brewermap(N, '-RdBu');
     %     cbh = colormap(cmap);
     %     colorbar;
-    %     saveas(f, sprintf("%s/fc_post_topoplot_inbound_%03d.png", save_dir, p_idx));
-    % 
-
-
+    %     saveas(f, sprintf("%s/fc_post_topoplot_inbound_avg.png", save_dir));
     % end
-    % 
-    % 
-    % % NETWORK CONNECTIVITY ON TOPOGRAPHIC BRAIN ??
-    % 
+    % % 
+    % % 
+    % % % NETWORK CONNECTIVITY ON TOPOGRAPHIC BRAIN ??
+    % % 
 
 end

@@ -57,12 +57,15 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     % [h, crit_p] = fdr_bh(p_values.', .05, 'pdep', 'yes'); % mafdr(p_values, 'BHFDR', true);
     % fdr_corrected_pvals = crit_p;
     rejected = fdr_corrected_pvals < alpha; % Logical array for significant tests
-    
+    orig_rejected = p_values < 0.01; %stricter threshold instead of alpha % Logical array for significant tests
+
     % Identify significant pairs
     significant_indices = find(rejected); % Indices of significant pairs
-    
+    orig_significant_indices = find(orig_rejected);
+
     % Map indices back to (i, j) electrode pairs
     significant_pairs = [];
+    orig_significant_pairs = [];
     w_stat_vals = zeros(n_channels, n_channels);
     count = 0;
     for i = 1:n_channels
@@ -75,6 +78,9 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
             % end
             if ismember(count, significant_indices)
                 significant_pairs = [significant_pairs; i, j]; % Append (i, j) pair
+            end
+            if ismember(count, orig_significant_indices)
+                orig_significant_pairs = [orig_significant_pairs; i, j]; % Append (i, j) pair
             end
         end
     end
@@ -91,10 +97,11 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     wilcoxon_results = struct();
     wilcoxon_results.w_stat_vals = w_stat_vals;
     wilcoxon_results.w_normalized = w_normalized;
-    wilcoxon_results.significant_pairs = significant_pairs; 
     wilcoxon_results.orig_h = h; 
     wilcoxon_results.orig_p_values = p_values;
+    wilcoxon_results.orig_significant_pairs = orig_significant_pairs;
     wilcoxon_results.corrected_p_values = fdr_corrected_pvals; 
+    wilcoxon_results.significant_pairs = significant_pairs; 
 
     % % Display result
     % disp('Normalized Wilcoxon W-statistics: (effect size - from Barnett et al., 2020)');
