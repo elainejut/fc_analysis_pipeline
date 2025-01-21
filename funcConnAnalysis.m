@@ -1,4 +1,4 @@
-function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_band, all_electrodes, electrode_organizations)
+function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_band, all_electrodes, model_order)
     % Perform connectivity analysis based on the method specified
     %
     % Input:
@@ -61,7 +61,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         disp('running functional connectivity analysis with granger causality...');
         % mvar analysis
         cfg = [];
-        cfg.order = 8; % Define model order
+        cfg.order = model_order; % 4; % Define model order
         % cfg.keeptrial = 'yes';
         cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
         mdata = ft_mvaranalysis(cfg, data);
@@ -85,9 +85,10 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     
     elseif strcmp(fc_method, 'dtf')
         disp('running functional connectivity analysis with directed transfer function...');
+        disp(sprintf('model order: %d', model_order));
         % mvar analysis
         cfg = [];
-        cfg.order = 4; % Define model order (was 8)
+        cfg.order = model_order; % 4; % Define model order (was 8)
         % cfg.keeptrial = 'yes';
         cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
         mdata = ft_mvaranalysis(cfg, data);
@@ -111,9 +112,10 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     
     elseif strcmp(fc_method, 'pdc')
         disp('running functional connectivity analysis with partial directed coherence...');
+        disp(sprintf('model order: %d', model_order));
         % mvar analysis
         cfg = [];
-        cfg.order = 4; % Define model order (was 8)
+        cfg.order = model_order; % 4; % Define model order (was 8)
         % cfg.keeptrial = 'yes';
         cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
         mdata = ft_mvaranalysis(cfg, data);
@@ -138,6 +140,15 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
 
     elseif strcmp(fc_method, 'mi')
         disp('running functional connectivity analysis with mutual information...');
+        % cfg           = [];
+        % cfg.method    = 'mtmfft';
+        % cfg.taper     = 'dpss';
+        % cfg.output    = 'fourier';
+        % cfg.foi    = FREQ_DICT(freq_band); % cfg.foi or cfg.foilim
+        % cfg.tapsmofrq = 2;
+        % cfg.channel   = 'all';
+        % cfg.keeptrials = 'yes';
+        % freq            = ft_freqanalysis(cfg, data);
 
         % specify the desired frequency range
         cfg = [];
@@ -185,7 +196,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         connectivity   = ft_connectivityanalysis(cfg, filtered_data);
         
         % find the connectivity matrix 
-        conn_mat = connectivity.mi;
+        conn_mat = mean(connectivity.mi, 3);
         conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
 
     elseif strcmp(fc_method, 'amplcorr')

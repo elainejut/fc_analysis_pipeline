@@ -15,18 +15,21 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
 
     % CONNECTIVITY MATRIX
     % Original electrode order
-    pre_matrix = fc_pre_group_all_chan(:, :, 19); % mean(fc_pre_group_all_chan, 3); % 
-    post_matrix = fc_post_group_all_chan(:, :, 19); % mean(fc_post_group_all_chan, 3); % 
+    pre_matrix = fc_pre_group_all_chan(:, :, 14); % mean(fc_pre_group_all_chan, 3); % 
+    post_matrix = fc_post_group_all_chan(:, :, 14); % mean(fc_post_group_all_chan, 3); % 
 
     pre_max = max(pre_matrix, [], 'all');
+    pre_min = min(pre_matrix, [], 'all');
     post_max = max(post_matrix, [], 'all');
+    post_min = min(pre_matrix, [], 'all');
     max_conn = max([pre_max, post_max]);
+    min_conn = min([pre_min, post_min]);
 
     % Reordered by electrode region
     reorderedMatrix = pre_matrix(ELECTRODE_ORGANIZATIONS.by_letter.idx, ELECTRODE_ORGANIZATIONS.by_letter.idx);
     reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
     f = figure('Visible','off');
-    imagesc(reorderedMatrix, [0 max_conn]); % [0 1] for standardization between all 
+    imagesc(reorderedMatrix, [min_conn max_conn]); % [0 1] for standardization between all 
     % title('Normalized W-statistic as effect size');
     % xlabel('To Node');
     % ylabel('From Node');
@@ -45,7 +48,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     N = 256; % number of colorsdd
     cmap = brewermap(N, '-RdBu');
     cbh = colormap(cmap);
-    % colorbar;
+    colorbar;
     hold on;
     % line([0,65.5], [2.5,2.5], 'Color', 'black', 'LineWidth', 3);
     % line([0,65.5], [7.5, 7.5], 'Color', 'black', 'LineWidth', 3);
@@ -79,7 +82,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     reorderedMatrix = post_matrix(ELECTRODE_ORGANIZATIONS.by_letter.idx, ELECTRODE_ORGANIZATIONS.by_letter.idx);
     reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
     f = figure('Visible','off');
-    imagesc(reorderedMatrix, [0 max_conn]); % [0 1] for standardization between all 
+    imagesc(reorderedMatrix, [min_conn max_conn]); % [0 1] for standardization between all 
     % title('Normalized W-statistic as effect size');
     % xlabel('To Node');
     % ylabel('From Node');
@@ -98,7 +101,7 @@ function createFigureInstantaneous(fc_pre_group_all_chan, fc_post_group_all_chan
     N = 256; % number of colorsdd
     cmap = brewermap(N, '-RdBu');
     cbh = colormap(cmap);
-    % colorbar;
+    colorbar;
     hold on;
     % line([0,65.5], [2.5,2.5], 'Color', 'black', 'LineWidth', 3);
     % line([0,65.5], [7.5, 7.5], 'Color', 'black', 'LineWidth', 3);

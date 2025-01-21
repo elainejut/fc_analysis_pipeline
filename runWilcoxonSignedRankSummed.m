@@ -57,15 +57,21 @@ function wilcoxon_results = runWilcoxonSignedRankSummed(pre, post, alpha, tail_d
     % [h, crit_p] = fdr_bh(p_values.', .05, 'pdep', 'yes'); % mafdr(p_values, 'BHFDR', true);
     % fdr_corrected_pvals = crit_p;
     rejected = fdr_corrected_pvals < alpha; % Logical array for significant tests
-    orig_rejected = p_values < 0.01; % alpha; % stricter threshold instead of alpha
+    orig_rejected_05 = p_values < 0.05; % alpha;
+    orig_rejected_01 = p_values < 0.01; % alpha; % stricter threshold instead of alpha
+    orig_rejected_001 = p_values < 0.001; % alpha; % stricter threshold instead of alpha
 
     % Identify significant pairs
     significant_indices = find(rejected); % Indices of significant pairs
-    orig_significant_indices = find(orig_rejected);
+    orig_significant_indices_05 = find(orig_rejected_05);
+    orig_significant_indices_01 = find(orig_rejected_01);
+    orig_significant_indices_001 = find(orig_rejected_001);
 
     % Map indices back to (i, j) electrode pairs
     significant_pairs = [];
-    orig_significant_pairs = [];
+    orig_significant_pairs_05 = [];
+    orig_significant_pairs_01 = [];
+    orig_significant_pairs_001 = [];
     w_stat_vals = []; % zeros(n_channels);
     count = 0;
     for i = 1:n_channels
@@ -79,8 +85,14 @@ function wilcoxon_results = runWilcoxonSignedRankSummed(pre, post, alpha, tail_d
         if ismember(count, significant_indices)
             significant_pairs = [significant_pairs; i]; % Append (i) electrode
         end
-        if ismember(count, orig_significant_indices)
-            orig_significant_pairs = [orig_significant_pairs; i]; % Append (i) electrode
+        if ismember(count, orig_significant_indices_05)
+            orig_significant_pairs_05 = [orig_significant_pairs_05; i]; % Append (i) electrode
+        end
+        if ismember(count, orig_significant_indices_01)
+            orig_significant_pairs_01 = [orig_significant_pairs_01; i]; % Append (i) electrode
+        end
+        if ismember(count, orig_significant_indices_001)
+            orig_significant_pairs_01 = [orig_significant_pairs_001; i]; % Append (i, j) pair
         end
         % end
     end
@@ -98,7 +110,9 @@ function wilcoxon_results = runWilcoxonSignedRankSummed(pre, post, alpha, tail_d
     wilcoxon_results.w_normalized = w_normalized; 
     wilcoxon_results.orig_h = h; 
     wilcoxon_results.orig_p_values = p_values;
-    wilcoxon_results.orig_significant_pairs = orig_significant_pairs;
+    wilcoxon_results.orig_significant_pairs_05 = orig_significant_pairs_05;
+    wilcoxon_results.orig_significant_pairs_01 = orig_significant_pairs_01;
+    wilcoxon_results.orig_significant_pairs_001 = orig_significant_pairs_001;
     wilcoxon_results.corrected_p_values = fdr_corrected_pvals; 
     wilcoxon_results.significant_pairs = significant_pairs; 
 

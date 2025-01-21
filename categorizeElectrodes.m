@@ -49,10 +49,10 @@ function electrode_organizations = categorizeElectrodes(all_electrodes)
     parietal_electrodes = {'Pz', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'POz', 'PO3', ...
                            'PO4', 'PO7', 'PO8', 'CP1', 'CP2', 'CP3', 'CP4', 'CP5', 'CP6', 'CPz'};
     occipital_electrodes = {'O1', 'O2', 'Oz', 'Iz'};
-    central_electrodes = {'FC5', 'FC1', 'C3', 'Cz', 'C4', 'FC6', 'FC2', 'FC3', 'C1', 'C5', 'C6', 'C2', 'FC4'};
+    central_electrodes = {'FC5', 'FC1', 'C3', 'Cz', 'C4', 'FC6', 'FC2', 'FCz', 'FC3', 'C1', 'C5', 'C6', 'C2', 'FC4'};
     
     % Define center, left, and right electrode names
-    center_electrodes = {'Fz', 'AFz', 'Cz', 'Pz', 'POz', 'Iz', 'CPz', 'Oz'};
+    center_electrodes = {'Fz', 'FCz', 'AFz', 'Cz', 'Pz', 'POz', 'Iz', 'CPz', 'Oz'};
     left_electrodes = {'Fp1', 'F3', 'F7', 'FT9', 'FC5', 'FC1', 'C3', 'T7', 'TP9', ...
                       'CP5', 'CP1', 'P3', 'P7', 'O1', 'F1', 'FT7', 'FC3', 'C1', ...
                       'C5', 'TP7', 'CP3', 'P1', 'P5', 'PO7', 'PO3', 'AF3', 'AF7', 'F5'};
