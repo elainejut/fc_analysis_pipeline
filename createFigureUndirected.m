@@ -1,20 +1,24 @@
 function createFigureUndirected(wilcoxon_results, wilcoxon_results_out, wilcoxon_results_in, ELECTRODE_ORGANIZATIONS, layout, freq_band, save_dir)
-    % [description]
+    % create figures for undirected FC
     %
     % Input:
-    %   
+    %   wilcoxon_results (struct) 
+    %   wilcoxon_results_out (struct) - electrode level; for (outgoing) electrodes
+    %   wilcoxon_results_in (struct) - electrode level; for (incoming)
+    %   electrodes (same as outgoing)
+    %   ELECTRODE_ORGANIZATIONS (struct) - reorganization of electrodes for
+    %   visualizations
+    %   layout (FieldTrip struct) - layout of EEG cap for topographic maps
+    %   freq_band (string) - frequency band
+    %   save_dir (string) - directory to save to
     %
     % Output:
+    %   saved figures: 1. connectivity matrix; 2. circular connectivity
+    %   graph; 3. topographic map of brain
     %   
     % 
 
     fc_wilcoxon_effect = wilcoxon_results.both.w_normalized;
-    % fc_wilcoxon_effect_decrease = wilcoxon_results.right.w_normalized;
-    % fc_wilcoxon_orig_sig_decrease = wilcoxon_results.right.orig_significant_pairs;
-    % fc_wilcoxon_sig_decrease = wilcoxon_results.right.significant_pairs;
-    % fc_wilcoxon_effect_increase = wilcoxon_results.left.w_normalized; % should be the same as fc_wilcoxon_effect_decrease
-    % fc_wilcoxon_orig_sig_increase = wilcoxon_results.left.orig_significant_pairs;
-    % fc_wilcoxon_sig_increase = wilcoxon_results.left.significant_pairs;
     fc_wilcoxon_orig_sig_both_01 = wilcoxon_results.both.orig_significant_pairs_01;
     fc_wilcoxon_orig_sig_both_001 = wilcoxon_results.both.orig_significant_pairs_001;
     fc_wilcoxon_sig_change = wilcoxon_results.both.significant_pairs;
@@ -22,29 +26,8 @@ function createFigureUndirected(wilcoxon_results, wilcoxon_results_out, wilcoxon
     wilcoxon_out_effect = wilcoxon_results_out.right.w_normalized;
     wilcoxon_in_effect = wilcoxon_results_in.right.w_normalized;
     wilcoxon_sig_change = wilcoxon_results_out.both.significant_pairs; % note that this is in original electrode order
-    % 
-    % % CONNECTIVITY MATRIX
-    % % Original electrode order
-    % f = figure('Visible','off');
-    % imagesc(fc_wilcoxon_effect_decrease, [-1 1]);
-    % % title('Normalized W-statistic as effect size');
-    % xlabel('To Node');
-    % ylabel('From Node');
-    % % Find significant connections and overlay dots
-    % % rows = fc_wilcoxon_sig_decrease(:, 1); 
-    % % cols = fc_wilcoxon_sig_decrease(:, 2); % Indices of significant connections
-    % % scatter(rows, cols, 5, 'w', 'filled');   % Overlay white dots (size 50)
-    % axis square;
-    % ax = gca;
-    % ax.XAxis.FontSize = 6;
-    % ax.YAxis.FontSize = 6;
-    % ax.FontWeight = 'bold';
-    % N = 256; % number of colorsdd
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
-    % saveas(f, sprintf("%s/orig_conn_mat.png", save_dir));
-
+    
+    % CONNECTIVITY MATRIX
     % Reordered by electrode region 
     newOrder = ELECTRODE_ORGANIZATIONS.by_letter.idx;
     reorderedMatrix = fc_wilcoxon_effect(newOrder, newOrder);
@@ -117,52 +100,6 @@ function createFigureUndirected(wilcoxon_results, wilcoxon_results_out, wilcoxon
     end
     axis square;
     saveas(f, sprintf("%s/conn_mat_by_letter.png", save_dir));
-
-    % % From node
-    % reorderedMatrix = wilcoxon_out_effect(ELECTRODE_ORGANIZATIONS.by_letter.idx).';
-    % reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
-    % f = figure('Visible','off');
-    % imagesc(reorderedMatrix, [-1 1]);
-    % % xlabel('To Node');
-    % ylabel('From Node');
-    % % Add labels to rows and columns
-    % % set(gca,'fontsize', ) 
-    % % xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
-    % yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
-    % % xticklabels(reorderedLabels); % Set x-axis labels
-    % yticklabels(reorderedLabels); % Set y-axis labels
-    % % xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
-    % ax = gca;
-    % % ax.XAxis.FontSize = 6;
-    % ax.YAxis.FontSize = 6;
-    % ax.FontWeight = 'bold';
-    % N = 256; % number of colorsdd
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
-    % saveas(f, sprintf("%s/conn_mat_out.png", save_dir));
-
-    % % To node
-    % reorderedMatrix = wilcoxon_in_effect(ELECTRODE_ORGANIZATIONS.by_letter.idx);
-    % reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
-    % f = figure('Visible','off');
-    % imagesc(reorderedMatrix, [-1 1]);
-    % xlabel('To Node');
-    % % ylabel('From Node');
-    % xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
-    % % yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
-    % xticklabels(reorderedLabels); % Set x-axis labels
-    % % yticklabels(reorderedLabels); % Set y-axis labels
-    % xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
-    % ax = gca;
-    % ax.XAxis.FontSize = 6;
-    % % ax.YAxis.FontSize = 6;
-    % ax.FontWeight = 'bold';
-    % N = 256; % number of colorsdd
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
-    % saveas(f, sprintf("%s/conn_mat_in.png", save_dir));
 
     % CONNECTIVITY CIRCLE
     % Reorganize electrode order for circle graph
@@ -246,7 +183,7 @@ function createFigureUndirected(wilcoxon_results, wilcoxon_results_out, wilcoxon
     
     modifiedCircularGraph(norm_decrease_01(newOrder, newOrder), 'SecondAdjacencyMatrix', norm_decrease_001(newOrder, newOrder), 'Colormap', cmap, 'Label', reorderedLabels);
     saveas(f, sprintf("%s/conn_circle_decrease.png", save_dir)); 
-    % 
+    
     % TOPOGRAPHIC BRAIN
     connectivity_sum = wilcoxon_out_effect;    % same as wilcoxon_in_effect for undirected
     topo_data = [];
@@ -275,9 +212,4 @@ function createFigureUndirected(wilcoxon_results, wilcoxon_results_out, wilcoxon
     cbh = colormap(cmap);
     % colorbar;
     saveas(f, sprintf("%s/topoplot.png", save_dir)); 
-
-
-    % NETWORK CONNECTIVITY ON TOPOGRAPHIC BRAIN ??
-
-
 end

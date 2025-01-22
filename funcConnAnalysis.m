@@ -4,10 +4,13 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
     % Input:
     %   data (struct) - data for analysis with FieldTrip analysis
     %   fc_method (string) - specify the type of FC analysis to do
-    %       options: ['icoh', 'corr', 'granger']
+    %       options: ['icoh', 'amplcorr', 'mi', 'dtf', 'pdc']
     %   freq_band (string) - specify the frequency band to use
-    %       options: ['theta', 'alpha', 'low_beta', 'high_beta', 'gamma']
-    %
+    %       options: ['delta', 'theta', 'alpha', 'low_beta', 'high_beta', 'gamma', 'broadband']
+    %   all_electrodes (array) - list of all electrodes
+    %   model_order (int) - specific model order to use if the fc_method is
+    %       dtf or pdc
+    %   
     % Output:
     %   connectivity_analysis_result (struct) - structure containing
     %   resulting connectivity matrices
@@ -27,7 +30,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
 
     if strcmp(fc_method, 'icoh')
         disp('running functional connectivity analysis with imaginary part of coherence...');
-        % frequency analysis --> maybe can also make this into its own function
+        % frequency analysis
         cfg           = [];
         cfg.method    = 'mtmfft';
         cfg.taper     = 'dpss';
@@ -38,14 +41,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.keeptrials = 'yes';
         freq            = ft_freqanalysis(cfg, data);
 
-        % disp("CHECKING FREQ BANDS: ");
-        % disp(data);
-        % disp(freq);
-        % disp(freq.freq(1));
-        % disp(freq.freq(end));
-
         % implement imaginary part of coherence functional connectivity 
-        % analysis with FieldTrip
         cfg         = [];
         cfg.method  ='coh';
         cfg.complex = 'absimag';
@@ -54,16 +50,16 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         % find the average connectivity matrix (averaged across each
         % frequency bin (dimension 3))
         conn_mat = mean(connectivity.cohspctrm, 3);
-        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0 % ERROR: TAKING THIS OUT BECAUSE DIAGONAL SHOULD BE 1 AND I SHOULDN'T NEED TO SET THIS
+        conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0 
 
 
-    elseif strcmp(fc_method, 'granger')
+    elseif strcmp(fc_method, 'granger') % needs work
         disp('running functional connectivity analysis with granger causality...');
         % mvar analysis
         cfg = [];
         cfg.order = model_order; % 4; % Define model order
         % cfg.keeptrial = 'yes';
-        cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
+        cfg.toolbox = 'biosig'; 
         mdata = ft_mvaranalysis(cfg, data);
 
         % freq analysis on mvar data
@@ -88,9 +84,8 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         disp(sprintf('model order: %d', model_order));
         % mvar analysis
         cfg = [];
-        cfg.order = model_order; % 4; % Define model order (was 8)
-        % cfg.keeptrial = 'yes';
-        cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
+        cfg.order = model_order; % 4;
+        cfg.toolbox = 'biosig'; 
         mdata = ft_mvaranalysis(cfg, data);
 
         % freq analysis on mvar data
@@ -99,10 +94,9 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.foi = FREQ_DICT(freq_band);
         mfreq      = ft_freqanalysis(cfg, mdata);
 
-        % find granger causality
+        % find dtf
         cfg           = [];
         cfg.method    = 'dtf';
-        % cfg.granger.sfmethod = 'bivariate';  % Use bivariate Granger causality
         connectivity       = ft_connectivityanalysis(cfg, mfreq);
 
         % find the average connectivity matrix (averaged across each
@@ -115,9 +109,8 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         disp(sprintf('model order: %d', model_order));
         % mvar analysis
         cfg = [];
-        cfg.order = model_order; % 4; % Define model order (was 8)
-        % cfg.keeptrial = 'yes';
-        cfg.toolbox = 'biosig'; % Use the BSMART toolbox (FieldTrip default)
+        cfg.order = model_order; % 4; 
+        cfg.toolbox = 'biosig'; 
         mdata = ft_mvaranalysis(cfg, data);
 
         % freq analysis on mvar data
@@ -126,10 +119,9 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.foi = FREQ_DICT(freq_band);
         mfreq      = ft_freqanalysis(cfg, mdata);
 
-        % find granger causality
+        % find pdc
         cfg           = [];
         cfg.method    = 'pdc';
-        % cfg.granger.sfmethod = 'bivariate';  % Use bivariate Granger causality
         connectivity       = ft_connectivityanalysis(cfg, mfreq);
 
         % find the average connectivity matrix (averaged across each
@@ -140,16 +132,6 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
 
     elseif strcmp(fc_method, 'mi')
         disp('running functional connectivity analysis with mutual information...');
-        % cfg           = [];
-        % cfg.method    = 'mtmfft';
-        % cfg.taper     = 'dpss';
-        % cfg.output    = 'fourier';
-        % cfg.foi    = FREQ_DICT(freq_band); % cfg.foi or cfg.foilim
-        % cfg.tapsmofrq = 2;
-        % cfg.channel   = 'all';
-        % cfg.keeptrials = 'yes';
-        % freq            = ft_freqanalysis(cfg, data);
-
         % specify the desired frequency range
         cfg = [];
         cfg.bpfilter = 'yes';          % Enable band-pass filtering
@@ -157,37 +139,6 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.demean = 'yes';            % Demean the data to remove DC offset (recommended)
         % apply the band-pass filter
         filtered_data = ft_preprocessing(cfg, data);
-
-        % data = filtered_data;
-        % % Assuming 'data' is the output of ft_preprocessing with common average referencing
-        % % Initialize a variable to store the means for all trials
-        % nTrials = numel(data.trial); % Number of trials
-        % nChannels = size(data.trial{1}, 1); % Number of channels (assuming consistent across trials)
-        % meanPerChannel = zeros(nTrials, nChannels);
-        % m
-        % % Loop through each trial to calculate the mean for each channel
-        % for trialIdx = 1:nTrials
-        %     % Extract the trial data: [nChannels x nSamples]
-        %     trialData = data.trial{trialIdx};
-        %     % Compute the mean across time for each channel
-        %     meanPerChannel(trialIdx, :) = mean(trialData, 2);
-        % end
-        % % Display the mean values for all trials and channels
-        % disp('Mean values per channel (rows = trials, columns = channels):');
-        % disp(meanPerChannel);  
-        % % Optionally, visualize the results
-        % figure;
-        % imagesc(meanPerChannel); % Heatmap of mean values
-        % colorbar;
-        % xlabel('Channels');
-        % ylabel('Trials');
-        % title('Mean values of each channel after CAR');
-        % % Verify if the mean is close to zero
-        % if all(abs(meanPerChannel(:)) < 1e-10) % Adjust threshold if needed
-        %     disp('All channels have a mean of approximately 0 after CAR.');
-        % else
-        %     disp('Some channels do not have a mean of 0. Check the data.');
-        % end
 
         % analysis with FieldTrip
         cfg         = [];
@@ -211,7 +162,7 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         cfg.method    = 'mtmfft';
         cfg.taper     = 'dpss';
         cfg.output    = 'fourier';
-        cfg.foi    = FREQ_DICT(freq_band); % cfg.foi or cfg.foilim
+        cfg.foi    = FREQ_DICT(freq_band); 
         cfg.tapsmofrq = 2;
         cfg.channel   = 'all';
         cfg.keeptrials = 'yes';
@@ -220,13 +171,12 @@ function connectivity_analysis_result = funcConnAnalysis(data, fc_method, freq_b
         % analysis with FieldTrip
         cfg         = [];
         cfg.method  ='amplcorr';
-        % cfg.complex = 'absimag';
         connectivity   = ft_connectivityanalysis(cfg, freq);        % find the connectivity matrix 
         
         conn_mat = mean(connectivity.amplcorrspctrm, 3);
         conn_mat_diag = conn_mat - diag(diag(conn_mat)); % make sure diagonal is 0
 
-    elseif strcmp(fc_method, 'test')
+    elseif strcmp(fc_method, 'test') % just for testing/experimentation purposes
         % disp('running functional connectivity analysis with Pearson correlation...');
         % % analysis with FieldTrip
         % cfg         = [];

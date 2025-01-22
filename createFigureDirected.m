@@ -1,18 +1,24 @@
 function createFigureDirected(wilcoxon_results, wilcoxon_results_out, wilcoxon_results_in,  ELECTRODE_ORGANIZATIONS, layout, freq_band, save_dir)
-    % [description]
+    % create figures for directed FC
     %
     % Input:
-    %   
+    %   wilcoxon_results (struct) 
+    %   wilcoxon_results_out (struct) - electrode level; for (outgoing) electrodes
+    %   wilcoxon_results_in (struct) - electrode level; for (incoming)
+    %   electrodes
+    %   ELECTRODE_ORGANIZATIONS (struct) - reorganization of electrodes for
+    %   visualizations
+    %   layout (FieldTrip struct) - layout of EEG cap for topographic maps
+    %   freq_band (string) - frequency band
+    %   save_dir (string) - directory to save to
     %
     % Output:
+    %   saved figures: 1. connectivity matrix; 2. circular connectivity
+    %   graph; 3. topographic map of brain
     %   
     % 
 
     fc_wilcoxon_effect = wilcoxon_results.both.w_normalized;
-    % fc_wilcoxon_effect_decrease = wilcoxon_results.right.w_normalized;
-    % fc_wilcoxon_sig_decrease = wilcoxon_results.right.significant_pairs;
-    % fc_wilcoxon_effect_increase = wilcoxon_results.left.w_normalized; % should be the same as fc_wilcoxon_effect_decrease
-    % fc_wilcoxon_sig_increase = wilcoxon_results.left.significant_pairs;
     fc_wilcoxon_orig_sig_both_01 = wilcoxon_results.both.orig_significant_pairs_01;
     fc_wilcoxon_orig_sig_both_001 = wilcoxon_results.both.orig_significant_pairs_001;
     fc_wilcoxon_sig_change = wilcoxon_results.both.significant_pairs;
@@ -22,25 +28,7 @@ function createFigureDirected(wilcoxon_results, wilcoxon_results_out, wilcoxon_r
     wilcoxon_out_sig_change = wilcoxon_results_out.both.significant_pairs; % note that this is in original electrode order
     wilcoxon_in_sig_change = wilcoxon_results_in.both.significant_pairs; % note that this is in original electrode order
   
-
-    % % CONNECTIVITY MATRIX
-    % % Original electrode order
-    % f = figure('Visible','off');
-    % imagesc(fc_wilcoxon_effect_decrease, [-1 1]);
-    % % title('Normalized W-statistic as effect size');
-    % xlabel('To Node');
-    % ylabel('From Node');
-    % axis square;
-    % ax = gca;
-    % ax.XAxis.FontSize = 6;
-    % ax.YAxis.FontSize = 6;
-    % ax.FontWeight = 'bold';
-    % N = 256; % number of colorsdd
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
-    % saveas(f, sprintf("%s/orig_conn_mat.png", save_dir));
-
+    % CONNECTIVITY MATRIX
     % Reordered by electrode region
     newOrder = ELECTRODE_ORGANIZATIONS.by_letter.idx;
     reorderedMatrix = fc_wilcoxon_effect(newOrder, newOrder);
@@ -108,83 +96,6 @@ function createFigureDirected(wilcoxon_results, wilcoxon_results_out, wilcoxon_r
     axis square;
     saveas(f, sprintf("%s/conn_mat_by_letter.png", save_dir));
 
-    % % From node
-    % reorderedMatrix = wilcoxon_out_effect(ELECTRODE_ORGANIZATIONS.by_letter.idx).';
-    % reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
-    % f = figure('Visible','off');
-    % imagesc(reorderedMatrix, [-1 1]);
-    % % xlabel('To Node');
-    % ylabel('From Node');
-    % % Add labels to rows and columns
-    % % set(gca,'fontsize', ) 
-    % % xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
-    % yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
-    % % xticklabels(reorderedLabels); % Set x-axis labels
-    % yticklabels(reorderedLabels); % Set y-axis labels
-    % % xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
-    % ax = gca;
-    % % ax.XAxis.FontSize = 6;
-    % ax.YAxis.FontSize = 6;
-    % ax.FontWeight = 'bold';
-    % N = 256; % number of colorsdd
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
-    % saveas(f, sprintf("%s/conn_mat_out.png", save_dir));
-    % 
-    % % To node
-    % reorderedMatrix = wilcoxon_in_effect(ELECTRODE_ORGANIZATIONS.by_letter.idx);
-    % reorderedLabels = ELECTRODE_ORGANIZATIONS.by_letter.label;
-    % f = figure('Visible','off');
-    % imagesc(reorderedMatrix, [-1 1]);
-    % xlabel('To Node');
-    % % ylabel('From Node');
-    % xticks(1:length(reorderedLabels)); % Set x-axis ticks at integer positions
-    % % yticks(1:length(reorderedLabels)); % Set y-axis ticks at integer positions
-    % xticklabels(reorderedLabels); % Set x-axis labels
-    % % yticklabels(reorderedLabels); % Set y-axis labels
-    % xtickangle(90); % Rotates x-axis labels by 45 degrees for better readability
-    % ax = gca;
-    % ax.XAxis.FontSize = 6;
-    % % ax.YAxis.FontSize = 6;
-    % ax.FontWeight = 'bold';
-    % N = 256; % number of colorsdd
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
-    % saveas(f, sprintf("%s/conn_mat_in.png", save_dir));
-
-    % % CONNECTIVITY CIRCLE
-    % % Reorganize electrode order for circle graph
-    % newOrder = ELECTRODE_ORGANIZATIONS.by_region.idx;
-    % reorderedMatrix = fc_wilcoxon_effect(newOrder, newOrder);
-    % reorderedLabels = ELECTRODE_ORGANIZATIONS.by_region.label;
-    % % Separate into "increase" and "decrease"
-    % mask_increase = (reorderedMatrix > 0);
-    % increase = zeros(size(reorderedMatrix));
-    % increase(mask_increase) = reorderedMatrix(mask_increase);
-    % mask_decrease = (reorderedMatrix < 0);
-    % decrease = zeros(size(reorderedMatrix));
-    % decrease(mask_decrease) = reorderedMatrix(mask_decrease);
-    % % Normalize for visualization (increase matrix)
-    % norm_increase = abs(increase) / max(abs(increase(:))); % Normalize matrix values
-    % norm_increase_thresh = norm_increase>0.9;
-    % N = length(norm_increase_thresh);
-    % cmap = brewermap(N, 'Reds');
-    % f = figure('Visible','off');
-    % circularGraph(norm_increase_thresh, 'Colormap', cmap, 'Label', reorderedLabels);
-    % saveas(f, sprintf("%s/conn_circle_increase.png", save_dir)); 
-    % 
-    % % Normalize for visualization (decrease matrix)
-    % norm_decrease = abs(decrease) / max(abs(decrease(:))); % Normalize matrix values
-    % norm_decrease_thresh = norm_decrease>0.9;
-    % % Visualize with CircularGraph toolbox
-    % N = length(norm_decrease_thresh);
-    % cmap = brewermap(N, 'Blues');
-    % f = figure('Visible','off');
-    % circularGraph(norm_decrease_thresh, 'Colormap', cmap, 'Label', reorderedLabels);
-    % saveas(f, sprintf("%s/conn_circle_decrease.png", save_dir)); 
-    % 
     % CONNECTIVITY CIRCLE
     % Reorganize electrode order for circle graph
     newOrder = ELECTRODE_ORGANIZATIONS.by_region.idx;
@@ -321,8 +232,5 @@ function createFigureDirected(wilcoxon_results, wilcoxon_results_out, wilcoxon_r
     cbh = colormap(cmap);
     % colorbar;
     saveas(f, sprintf("%s/topoplot_in.png", save_dir)); 
-
-    % % NETWORK CONNECTIVITY ON TOPOGRAPHIC BRAIN ??
-    % 
 
 end

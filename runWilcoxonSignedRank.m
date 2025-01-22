@@ -1,14 +1,15 @@
 function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
-    % [description]
+    % run wilcoxon signed rank test on connectivity matrices
     %
     % Input:
     %   pre  - (64, 64, n) connectivity matrix for "pre" condition
     %   post - (64, 64, n) connectivity matrix for "post" condition
     %   alpha - significance level (default 0.05)
-    %   tail_dir - direction of tail for signrank test ('tail', 'right' is
-    %   checking whether pre-post > 0; ==> if yes, then there was a decrease)
-    %
+    %   tail_dir - direction of tail for signrank test (right now stick
+    %   with "both")
+    % 
     % Output:
+    %   wilcoxon_results (struct)
     % 
 
     [n_channels, ~, n_participants] = size(pre);
@@ -17,14 +18,7 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     p_values = []; % Store p-values for all (i, j) pairs
     w_stats = [];
 
-    % Check whether matrices are symmetric --> FOR NOW DO EVERYTHING AS IF
-    % NOT SYMMETRIC; MAYBE INTRODUCE THIS LATER
-    % if issymmetric(pre) && issymmetric(post)
-    % check_vals = struct();
-    % check_vals.p = [];
-    % check_vals.h = [];
-    % check_vals.stats = [];
-    % Iterate through upper triangle of matrix (including diagonal)
+    % Iterate through matrix 
     for i = 1:n_channels
         for j = 1:n_channels
             % Extract paired data across participants
@@ -32,11 +26,7 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
             post_values = squeeze(post(i, j, :)); % Vector of size (n_participants, 1)
             % Perform Wilcoxon signed-rank test
             try 
-                [p,h,stats] = signrank(pre_values, post_values, 'tail', tail_dir); % Two-tailed test --> 'tail', 'right' is checking whether pre-post > 0; ==> if yes, then there was a decrease
-                % disp(stats);
-                % check_vals.p = [check_vals.p, p];
-                % check_vals.h = [check_vals.h, h];
-                % check_vals.stats = [check_vals.stats, stats];
+                [p,h,stats] = signrank(pre_values, post_values, 'tail', tail_dir); 
                 p_values = [p_values; p]; % Append p-value to the list
                 w_stats = [w_stats; stats.signedrank];
             catch ME
@@ -50,12 +40,7 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     end
 
     % Apply FDR correction
-    % [fdr_corrected_pvals, rejected] = mafdr(p_values, 'BHFDR', true);
-    % disp(size(p_values));
     fdr_corrected_pvals = mafdr(p_values, 'BHFDR', true);
-    % fdr_corrected_pvals = mafdr(p_values);    
-    % [h, crit_p] = fdr_bh(p_values.', .05, 'pdep', 'yes'); % mafdr(p_values, 'BHFDR', true);
-    % fdr_corrected_pvals = crit_p;
     rejected = fdr_corrected_pvals < alpha; % Logical array for significant tests
     orig_rejected_05 = p_values < 0.05;
     orig_rejected_01 = p_values < 0.01; %stricter threshold instead of alpha % Logical array for significant tests
@@ -77,11 +62,7 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     for i = 1:n_channels
         for j = 1:n_channels
             count = count + 1;
-            % if i == j
-            %     w_stat_vals(i, j) = 0;
-            % else
             w_stat_vals(i, j) = w_stats(count);
-            % end
             if ismember(count, significant_indices)
                 significant_pairs = [significant_pairs; i, j]; % Append (i, j) pair
             end
@@ -117,17 +98,4 @@ function wilcoxon_results = runWilcoxonSignedRank(pre, post, alpha, tail_dir)
     wilcoxon_results.corrected_p_values = fdr_corrected_pvals; 
     wilcoxon_results.significant_pairs = significant_pairs; 
 
-    % % Display result
-    % disp('Normalized Wilcoxon W-statistics: (effect size - from Barnett et al., 2020)');
-    % figure;imagesc(W_normalized);
-    % xlabel('To Node');
-    % ylabel('From Node');
-    % % xticks(data_load.data_interp_avgref.label);
-    % % cbh = colorbar();
-    % N = 256; % number of colorsdd
-    % % cmap = [linspace(0,1,N).' linspace(0,1,N).' ones(N,1)]; % decreasing R and G; B = 1
-    % cmap = brewermap(N, '-RdBu');
-    % cbh = colormap(cmap);
-    % colorbar;
- 
 end

@@ -4,8 +4,7 @@ function data_out = loadData(filename, reref_mode, downsample_bool)
     % Input:
     %   filename (string) - filename of the data 
     %   reref_mode (string) - 'none': no rereferencing; 'car': common
-    %   average referencing; 'linked': linked mastoid (use T7 and T8 for
-    %   our data)
+    %   average referencing
     %   downsample_bool (boolean) - true: downsample from 500 to 250 Hz;
     %   false: keep Fs=500 Hz
     %
@@ -35,22 +34,8 @@ function data_out = loadData(filename, reref_mode, downsample_bool)
         cfg.implicitref = 'FCz';
         cfg.refchannel = 'all';
         data_eeg = ft_preprocessing(cfg, data_before_car);
-    elseif strcmp(reref_mode, 'linked')
-        disp('running linked-ear rereferencing...')
-        cfg = [];
-        cfg.channel = 'all'; % this is the default
-        cfg.reref = 'yes';
-        cfg.refmethod = 'avg';
-        cfg.implicitref = 'FCz'; % see below
-        cfg.refchannel = {'T7', 'T8'}; % T7 and T8 as virtual ear lobes
-        data_eeg = ft_preprocessing(cfg, data_before_car);
     else
-        disp('skipping CAR and linked-ear rereferencing...');
-        % cfg = [];
-        % cfg.channel = 'all'; % this is the default
-        % cfg.reref = 'no';
-        % cfg.implicitref = 'FCz';
-        % data_eeg = ft_preprocessing(cfg, data_before_car);
+        disp('skipping CAR...');
         data_eeg = data_before_car;
     end
 
